@@ -8,7 +8,7 @@ export class DeepSeekService {
   private readonly apiUrl = Config.DEEPSEEK_API_URL;
   private readonly apiKey = Config.DEEPSEEK_API_KEY;
 
-  async analyzeWallet(walletData: WalletFeatures): Promise<boolean> {
+  async analyzeWallet(walletData: WalletFeatures) {
     const prompt = this.buildWhaleDetectionPrompt(walletData);
 
     const response = await axios.post(
