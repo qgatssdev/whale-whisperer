@@ -42,7 +42,7 @@ export class WhaleDetectorService {
   private async meetsHardRules(address: string): Promise<boolean> {
     const [balance, txnCount] = await Promise.all([
       this.clusterService.getWalletBalance(address),
-      this.clusterService.getTransactionCount(address, 7),
+      this.clusterService.getTransactionCount(address, 14),
     ]);
 
     return (
