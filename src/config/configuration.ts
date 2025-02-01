@@ -38,10 +38,13 @@ class Configuration {
   readonly HELIUS_API_KEY = process.env.HELIUS_API_KEY as string;
 
   @IsString()
-  readonly DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY as string;
+  readonly AIMODEL_API_KEY = process.env.AIMODEL_API_KEY as string;
 
   @IsString()
-  readonly DEEPSEEK_API_URL = process.env.DEEPSEEK_API_URL as string;
+  readonly AIMODEL_API_URL = process.env.AIMODEL_API_URL as string;
+
+  @IsString()
+  readonly AIMODEL_TYPE = process.env.AIMODEL_TYPE as string;
 
   constructor() {
     const error = validateSync(this);

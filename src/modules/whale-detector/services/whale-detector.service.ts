@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DeepSeekService } from 'src/modules/deepseek/services/deepseek.service';
+import { AIModelService } from 'src/modules/ai-model/services/ai-model.service';
 import { HARD_RULES } from 'src/libs/common/constants';
 import { WhaleService } from 'src/modules/whale/services/whale.service';
 import { ClusterService } from './cluster.service';
@@ -10,7 +10,7 @@ export class WhaleDetectorService {
 
   constructor(
     private whaleService: WhaleService,
-    private deepSeek: DeepSeekService,
+    private AI: AIModelService,
     private clusterService: ClusterService,
   ) {}
 
@@ -26,14 +26,14 @@ export class WhaleDetectorService {
 
     try {
       const features = await this.clusterService.getWalletFeatures(address);
-      const aiResult = await this.deepSeek.analyzeWallet(features);
+      const aiResult = await this.AI.analyzeWallet(features);
 
       if (aiResult.isWhale) {
         await this.whaleService.addWhale(address, 'ai', aiResult.confidence);
         return true;
       }
     } catch (error) {
-      this.logger.error(`DeepSeek analysis failed: ${error.message}`);
+      this.logger.error(`AI Model analysis failed: ${error.message}`);
     }
 
     return false;
@@ -46,7 +46,7 @@ export class WhaleDetectorService {
     ]);
 
     return (
-      balance > HARD_RULES.MIN_BALANCE || txnCount > HARD_RULES.MIN_7D_ACTIVITY
+      balance > HARD_RULES.MIN_BALANCE || txnCount > HARD_RULES.MIN_14D_ACTIVITY
     );
   }
 }

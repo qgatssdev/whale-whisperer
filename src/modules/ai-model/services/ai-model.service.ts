@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { WalletFeatures } from '../interface/deepseek.interface';
+import { WalletFeatures } from '../interface/ai-mode.interface';
 import { Config } from 'src/config';
 
 @Injectable()
-export class DeepSeekService {
-  private readonly apiUrl = Config.DEEPSEEK_API_URL;
-  private readonly apiKey = Config.DEEPSEEK_API_KEY;
+export class AIModelService {
+  private readonly apiUrl = Config.AIMODEL_API_URL;
+  private readonly apiKey = Config.AIMODEL_API_KEY;
+  private readonly modelType = Config.AIMODEL_TYPE;
 
   async analyzeWallet(walletData: WalletFeatures) {
     const prompt = this.buildWhaleDetectionPrompt(walletData);
@@ -14,8 +15,14 @@ export class DeepSeekService {
     const response = await axios.post(
       this.apiUrl,
       {
-        model: 'deepseek-reasoner',
-        messages: [{ role: 'user', content: prompt }],
+        model: this.modelType,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant.',
+          },
+          { role: 'user', content: prompt },
+        ],
         temperature: 1.0,
       },
       {

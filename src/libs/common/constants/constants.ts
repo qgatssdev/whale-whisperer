@@ -12,6 +12,6 @@ export interface WhaleCriteria {
 
 export const HARD_RULES = {
   MIN_BALANCE: 1_000_000, // $1M SOL equivalent
-  MIN_7D_ACTIVITY: 20, // Transactions in last 2 weeks
+  MIN_14D_ACTIVITY: 20, // Transactions in last 2 weeks
   MIN_ASSOCIATIONS: 2, // Links to known whales
 };
