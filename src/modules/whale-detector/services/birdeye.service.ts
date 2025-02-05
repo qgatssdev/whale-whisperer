@@ -13,6 +13,8 @@ export class BirdeyeService {
     this.baseUrl = Config.BIRDEYE_API_URL;
   }
 
+  //TODO: get actual type interfaces for all any types
+
   private async makeApiRequest<T>(endpoint: string): Promise<any> {
     try {
       const response: AxiosResponse<T> = await axios.get(

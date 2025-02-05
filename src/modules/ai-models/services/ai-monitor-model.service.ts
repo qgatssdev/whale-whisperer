@@ -12,6 +12,8 @@ export class AIMonitorAgentService {
 
   constructor(private readonly birdeyeService: BirdeyeService) {}
 
+  //TODO: get actual type interfaces for all any types
+
   async analyzeWallet(walletAddress: string) {
     try {
       const walletData =

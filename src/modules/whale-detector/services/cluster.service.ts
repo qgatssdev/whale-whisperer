@@ -12,6 +12,8 @@ export class ClusterService {
     private whaleService: WhaleService,
   ) {}
 
+  //TODO: get actual type interfaces for all any types
+
   async getWalletFeatures(address: string) {
     const [balance, transactions] = await Promise.all([
       this.getWalletBalance(address),
