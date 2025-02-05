@@ -23,7 +23,19 @@ export class Whale extends BaseEntity {
   @Column({ type: 'real', nullable: true })
   @Min(0)
   @Max(100)
-  confidence?: number;
+  confidence: number;
+
+  @Column({ nullable: true })
+  tradingStyle: string;
+
+  @Column({ nullable: true })
+  strengths: string;
+
+  @Column({ nullable: true })
+  riskScore: number;
+
+  @Column({ nullable: true })
+  profitabilityScore: number;
 
   @CreateDateColumn()
   firstDetectedAt: Date;

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AIModelService } from 'src/modules/ai-model/services/ai-model.service';
-import { HARD_RULES } from 'src/libs/common/constants';
-import { WhaleService } from 'src/modules/whale/services/whale.service';
 import { ClusterService } from './cluster.service';
+import { WhaleService } from 'src/modules/whale/services/whale.service';
+import { HARD_RULES } from 'src/libs/common/constants';
+import { AIMonitorAgentService } from 'src/modules/ai-models/services/ai-monitor-model.service';
 
 @Injectable()
 export class WhaleDetectorService {
@@ -10,7 +10,7 @@ export class WhaleDetectorService {
 
   constructor(
     private whaleService: WhaleService,
-    private AI: AIModelService,
+    private aiMonitorAgentService: AIMonitorAgentService,
     private clusterService: ClusterService,
   ) {}
 
@@ -20,33 +20,68 @@ export class WhaleDetectorService {
     }
 
     if (await this.meetsHardRules(address)) {
-      await this.whaleService.addWhale(address, 'rule');
+      await this.whaleService.addWhale({ address, source: 'rule' });
       return true;
     }
 
     try {
-      const features = await this.clusterService.getWalletFeatures(address);
-      const aiResult = await this.AI.analyzeWallet(features);
+      const aiResult = await this.aiMonitorAgentService.analyzeWallet(address);
 
-      if (aiResult.isWhale) {
-        await this.whaleService.addWhale(address, 'ai', aiResult.confidence);
+      if (this.isWhaleByAIAnalysis(aiResult)) {
+        await this.whaleService.addWhale({
+          address,
+          source: 'ai',
+          confidence: aiResult.confidence,
+          tradingStyle: aiResult.tradingStyle,
+          strengths: aiResult.keyStrengths,
+          riskScore: aiResult.analysis.riskManagement,
+          profitabilityScore: aiResult.profitabilityScore,
+        });
         return true;
       }
     } catch (error) {
-      this.logger.error(`AI Model analysis failed: ${error.message}`);
+      this.logger.error(
+        `Failed to evaluate wallet ${address}: ${error.message}`,
+        error.stack,
+      );
     }
 
     return false;
   }
 
-  private async meetsHardRules(address: string): Promise<boolean> {
-    const [balance, txnCount] = await Promise.all([
-      this.clusterService.getWalletBalance(address),
-      this.clusterService.getTransactionCount(address, 14),
-    ]);
-
+  private isWhaleByAIAnalysis(analysis: any): boolean {
     return (
-      balance > HARD_RULES.MIN_BALANCE || txnCount > HARD_RULES.MIN_14D_ACTIVITY
+      analysis.isSuccessfulTrader &&
+      analysis.confidence > 75 &&
+      analysis.profitabilityScore > 70 &&
+      analysis.analysis.patternQuality > 65
     );
+  }
+
+  private async meetsHardRules(address: string): Promise<boolean> {
+    try {
+      const [balance, txnCount] = await Promise.all([
+        this.clusterService.getWalletBalance(address),
+        this.clusterService.getTransactionCount(address, 14),
+      ]);
+
+      const meetsBalance = balance > HARD_RULES.MIN_BALANCE;
+      const meetsActivity = txnCount > HARD_RULES.MIN_14D_ACTIVITY;
+
+      if (meetsBalance && meetsActivity) {
+        this.logger.debug(
+          `Wallet ${address} meets hard rules: Balance: ${balance}, TxCount: ${txnCount}`,
+        );
+
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      this.logger.error(
+        `Failed to check hard rules for ${address}: ${error.message}`,
+      );
+      return false;
+    }
   }
 }

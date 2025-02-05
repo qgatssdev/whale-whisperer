@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Whale } from '../entity/whale.entity';
 import { WhaleRepository } from '../repository/whale.repository';
+import { AddWhale } from '../interface';
 
 @Injectable()
 export class WhaleService {
@@ -16,15 +17,15 @@ export class WhaleService {
     }));
   }
 
-  async addWhale(
-    address: string,
-    source: Whale['detectionSource'],
-    confidence?: number,
-  ): Promise<Whale> {
+  async addWhale(payload: AddWhale): Promise<Whale> {
     const whale = await this.whaleRepository.create({
-      walletAddress: address,
-      detectionSource: source,
-      confidence,
+      walletAddress: payload.address,
+      detectionSource: payload.source,
+      confidence: payload.confidence,
+      tradingStyle: payload.tradingStyle,
+      strengths: payload.strengths,
+      riskScore: payload.riskScore,
+      profitabilityScore: payload.profitabilityScore,
       isActive: true,
     });
 

@@ -46,6 +46,12 @@ class Configuration {
   @IsString()
   readonly AIMODEL_TYPE = process.env.AIMODEL_TYPE as string;
 
+  @IsString()
+  readonly BIRDEYE_API_KEY = process.env.BIRDEYE_API_KEY as string;
+
+  @IsString()
+  readonly BIRDEYE_API_URL = process.env.BIRDEYE_API_URL as string;
+
   constructor() {
     const error = validateSync(this);
 
