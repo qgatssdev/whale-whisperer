@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Whale } from '../entity/whale.entity';
 import { WhaleRepository } from '../repository/whale.repository';
-import { AddWhale } from '../interface';
+import { CreateWhaleDto } from '../dto/create-whale.dto';
 
 @Injectable()
 export class WhaleService {
@@ -11,25 +11,17 @@ export class WhaleService {
     private readonly whaleRepository: WhaleRepository,
   ) {}
 
-  async isKnownWhale(address: string): Promise<boolean> {
-    return !!(await this.whaleRepository.findOne({
-      where: { walletAddress: address },
-    }));
-  }
-
-  async addWhale(payload: AddWhale): Promise<Whale> {
+  async addWhale(payload: CreateWhaleDto): Promise<Whale> {
     const whale = await this.whaleRepository.create({
-      walletAddress: payload.address,
-      detectionSource: payload.source,
-      confidence: payload.confidence,
-      tradingStyle: payload.tradingStyle,
-      strengths: payload.strengths,
-      riskScore: payload.riskScore,
-      profitabilityScore: payload.profitabilityScore,
-      isActive: true,
+      walletAddress: payload.walletAddress,
     });
 
     return this.whaleRepository.save(whale);
+  }
+
+  async getWhales(): Promise<Whale[]> {
+    const whales = await this.whaleRepository.findAll({});
+    return whales;
   }
 
   async updateWalletData(address: string, update: Partial<Whale>) {
@@ -37,12 +29,5 @@ export class WhaleService {
       { walletAddress: address },
       update,
     );
-  }
-
-  async getActiveWhales(): Promise<Whale[]> {
-    return this.whaleRepository.findAll({
-      where: { isActive: true },
-      order: { balance: 'DESC' },
-    });
   }
 }
